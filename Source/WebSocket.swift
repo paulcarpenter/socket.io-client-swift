@@ -136,7 +136,7 @@ public class WebSocket : NSObject, StreamDelegate {
     private var certValidated = false
     private var didDisconnect = false
     private var readyToWrite = false
-    private let mutex = Lock()
+    private let mutex = NSLock()
     private let notificationCenter = NotificationCenter.default
     private var canDispatch: Bool {
         mutex.lock()
@@ -145,7 +145,7 @@ public class WebSocket : NSObject, StreamDelegate {
         return canWork
     }
     //the shared processing queue used for all websocket
-    private static let sharedWorkQueue = DispatchQueue(label: "com.vluxe.starscream.websocket", attributes: DispatchQueueAttributes.serial)
+    private static let sharedWorkQueue = DispatchQueue(label: "com.vluxe.starscream.websocket")
     
     //used for setting protocols.
     public init(url: URL, protocols: [String]? = nil) {
@@ -176,7 +176,7 @@ public class WebSocket : NSObject, StreamDelegate {
     public func disconnect(_ forceTimeout: TimeInterval? = nil) {
         switch forceTimeout {
         case .some(let seconds) where seconds > 0:
-            queue.after(when: DispatchTime.now() + Double(Int64(seconds * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { [weak self] in
+            queue.asyncAfter(deadline: DispatchTime.now() + Double(Int64(seconds * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { [weak self] in
                 self?.disconnectStream(nil)
             }
             fallthrough
@@ -796,7 +796,7 @@ public class WebSocket : NSObject, StreamDelegate {
                 let writeBuffer = UnsafePointer<UInt8>(frame!.bytes+total)
                 let len = outStream.write(writeBuffer, maxLength: offset-total)
                 if len < 0 {
-                    var error: NSError?
+                    var error: Error?
                     if let streamError = outStream.streamError {
                         error = streamError
                     } else {

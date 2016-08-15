@@ -47,7 +47,7 @@ public extension SocketLogger {
     private func abstractLog(_ logType: String, message: String, type: String, args: [Any]) {
         guard log else { return }
         
-        let newArgs = args.map({arg -> CVarArg in String(arg)})
+        let newArgs = args.map({arg -> CVarArg in String(describing: arg)})
         let messageFormat = String(format: message, arguments: newArgs) ?? ""
         
         NSLog("\(logType) \(type): %@", messageFormat)

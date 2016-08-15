@@ -27,8 +27,8 @@ import Foundation
 public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable {
     public let socketURL: URL
 
-    public private(set) var engine: SocketEngineSpec?
-    public private(set) var status = SocketIOClientStatus.notConnected {
+    public var engine: SocketEngineSpec?
+    public var status = SocketIOClientStatus.notConnected {
         didSet {
             switch status {
             case .connected:
@@ -56,7 +56,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
-    private var handlers = [SocketEventHandler]()
+    public var handlers = [SocketEventHandler]()
     private var ackHandlers = SocketAckManager()
     private var reconnecting = false
 
@@ -71,7 +71,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         self.options = options
         self.socketURL = socketURL
         
-        if socketURL.absoluteString.hasPrefix("https://") ?? false {
+        if socketURL.absoluteString.hasPrefix("https://") {
             self.options.insertIgnore(.secure(true))
         }
         
@@ -238,10 +238,10 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         return createOnAck([event as AnyObject] + items)
     }
 
-    private func _emit(_ data: [AnyObject], ack: Int? = nil) {
+    public func _emit(_ data: [AnyObject], ack: Int? = nil) {
         emitQueue.async {
             guard self.status == .connected else {
-                self.handleEvent("error", data: ["Tried emitting when not connected"], isInternalMessage: true)
+                self.handleEvent("error", data: ["Tried emitting when not connected" as AnyObject], isInternalMessage: true)
                 return
             }
             
@@ -384,7 +384,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     /// Adds a handler that will be called on every event.
-    public func onAny(_ handler: (SocketAnyEvent) -> Void) {
+    public func onAny(_ handler: ((SocketAnyEvent) -> Void)?) {
         anyHandler = handler
     }
 

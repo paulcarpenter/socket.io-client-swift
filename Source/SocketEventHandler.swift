@@ -24,7 +24,7 @@
 
 import Foundation
 
-struct SocketEventHandler {
+public struct SocketEventHandler {
     let event: String
     let id: UUID
     let callback: NormalCallback

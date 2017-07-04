@@ -37,7 +37,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     public private(set) var engine: SocketEngineSpec?
 
     /// The status of this client.
-    public private(set) var status = SocketIOClientStatus.notConnected {
+    public private(set) dynamic var status = SocketIOClientStatus.notConnected {
         didSet {
             switch status {
             case .connected:
